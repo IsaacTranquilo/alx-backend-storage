@@ -23,7 +23,32 @@ def count_calls(method: Callable) -> Callable:
 
     return wrapper
 
-class Ca`che:
+def call_history(method: Callable) -> Callable:
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """
+        wrapper function
+        """
+        base_key =  method._qualname_
+
+        inputs_key = f"{method.__qualname__}:inputs"
+
+        outputs_key = f"{method.__qualname__}:outputs"
+        
+        input_data =str(args)
+
+        self._redis.rpush(inputs_key, str(args))
+        
+        output = method(self, *args, **kwargs)
+        
+        output_data = str(output)
+
+        self._redis.rpush(outputs_key, str(output))
+
+        return output
+    return wrapper
+
+class Cache:
     def _init_(self, host='localhost', port=6379, db=0):
         """
         """
@@ -31,6 +56,7 @@ class Ca`che:
 
         self._redis.flushdb()
 
+    @call_history
     @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
