@@ -48,6 +48,22 @@ def call_history(method: Callable) -> Callable:
         return output
     return wrapper
 
+    def replay(method: Callable): -> None
+        """
+        Replays History of the function
+        """
+        
+        inputs_key = f"{method.__qualname__}:inputs"
+        outputs_key = f"{method.__qualname__}:outputs"
+    
+        inputs = method._redis.lrange(inputs_key, 0, -1)
+        outputs = method._redis.lrange(outputs_key, 0, -1)
+    
+        print(f"{method.__qualname__} was called {len(inputs)} times:")
+        for args, output in zip(inputs, outputs):
+        print(f"{method.__qualname__}({args.decode('utf-8')}) -> {output.decode('utf-8')}")
+
+
 class Cache:
     def _init_(self, host='localhost', port=6379, db=0):
         """
